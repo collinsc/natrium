@@ -7,4 +7,4 @@ install:
 
 script:
  - pytest
- - pylint *.py application/*.py || true
+ - pylint tests/*.py application/*.py || true
