@@ -7,52 +7,63 @@ import pandas as pd
 
 HEADERS = list(['track_id', 'title', 'song_id', 'release', 'artist_id', 'artist_mbid',
                 'artist_name', 'duration', 'artist_familiarity', 'artist_hotttnesss',
-                'year', 'lyrics'])
+                'year', 'genre', 'lyrics'])
 
-DATA = []
 
-with open('../tagtraum_genre.cls', mode='r') as genre_map:
-    GENRE_READER = csv.DictReader(genre_map, delimiter='\t')
-    with sqlite3.connect('../musixmatch_lyrics.db') as lyrics_db:
-        LYRICS_C = lyrics_db.cursor()
-        WORDS_C = lyrics_db.cursor()
-        with sqlite3.connect('../msd_meta.db') as msd_db:
-            MSD_C = msd_db.cursor()
+def main():
+    """
+    Executes the aggregation procedure pulling data from databases into one CSV.
+    :return:
+    """
+    data = []
 
-            # Restriction for testing purposes
-            COUNT = 0
+    with open('../tagtraum_genre.cls', mode='r') as genre_map:
+        genre_reader = csv.DictReader(genre_map, delimiter='\t')
+        with sqlite3.connect('../musixmatch_lyrics.db') as lyrics_db:
+            lyrics_c = lyrics_db.cursor()
+            words_c = lyrics_db.cursor()
+            with sqlite3.connect('../msd_meta.db') as msd_db:
+                msd_c = msd_db.cursor()
 
-            for row in GENRE_READER:
-                print(row['msd_id'])
-                MSD_C.execute('SELECT * FROM songs WHERE track_id LIKE ?', [row['msd_id']])
-                song = MSD_C.fetchall()
-                if not song:
-                    continue
+                # Restriction for testing purposes
+                count = 0
 
-                # Make a list out of the song metadata
-                params_towrite = list(song[0])
-                print(params_towrite[1])
+                for row in genre_reader:
+                    print(row['msd_id'])
+                    msd_c.execute('SELECT * FROM songs WHERE track_id LIKE ?', [row['msd_id']])
+                    song = msd_c.fetchall()
+                    if not song:
+                        continue
 
-                # Get the lyrics
-                lyrics_towrite = ''
-                LYRICS_C.execute('SELECT word, count FROM lyrics WHERE track_id LIKE ?',
-                                 [row['msd_id']])
-                lyrics = LYRICS_C.fetchall()
+                    # Make a list out of the song metadata
+                    params_towrite = list(song[0])
+                    params_towrite.append(row['genre'])
+                    print(params_towrite[1])
 
-                # Convert the lyrics into the desired format
-                for lyric in lyrics:
-                    WORDS_C.execute('SELECT number FROM words_indexed WHERE word LIKE ?',
-                                    [lyric[0]])
-                    lyrics_towrite += '{}:{} '.format(WORDS_C.fetchone()[0], lyric[1])
+                    # Get the lyrics
+                    lyrics_towrite = ''
+                    lyrics_c.execute('SELECT word, count FROM lyrics WHERE track_id LIKE ?',
+                                     [row['msd_id']])
+                    lyrics = lyrics_c.fetchall()
 
-                # Add the lyrics as the last parameter
-                params_towrite.append(lyrics_towrite)
-                DATA.append(params_towrite)
+                    # Convert the lyrics into the desired format
+                    for lyric in lyrics:
+                        words_c.execute('SELECT number FROM words_indexed WHERE word LIKE ?',
+                                        [lyric[0]])
+                        lyrics_towrite += '{}:{} '.format(words_c.fetchone()[0], lyric[1])
 
-                # Restrict for testing purposes
-                COUNT += 1
-                if COUNT >= 10:
-                    break
+                    # Add the lyrics as the last parameter
+                    params_towrite.append(lyrics_towrite)
+                    data.append(params_towrite)
 
-    # Output to CSV
-    pd.DataFrame(data=DATA, columns=HEADERS).to_csv('../aggregated.csv')
+                    # Restrict for testing purposes
+                    count += 1
+                    if count >= 10:
+                        break
+
+        # Output to CSV
+        pd.DataFrame(data=data, columns=HEADERS).to_csv('../aggregated.csv')
+
+
+if __name__ == "__main__":
+    main()
