@@ -101,4 +101,13 @@ ENV/
 # mypy
 .mypy_cache/
 
+# input files
+tagtraum_genre.cls
+musixmatch_lyrics.db
+msd_meta.db
+
+# output files
+aggregated.csv
+
+
 
