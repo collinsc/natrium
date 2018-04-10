@@ -2,8 +2,9 @@
 """ Standalone script for evaluating a dataset.
 Calculates measures of label quality and tries to spot outliers.
 
-Args:
-    -f, --file the file to read """
+Usage:
+    python3 investigate.py <filename>"""
+    
 
 import sys
 import argparse
@@ -15,10 +16,21 @@ class Investigator(object):
     def __init__(self):
         """Initializes basic statistics."""
         self.entry_count = 0
+        self.artists = set([])
 
     def proccess_row(self, row):
         """Proccesses a pandas series obect."""
         self.entry_count += 1
+        self.artists.add(row["artist_id"])
+
+    def generate_statistics(self):
+        """Gives a dict of the most important statistics of the dataset."""
+        output = {}
+        output["entry_count"] = self.entry_count
+        output["unique_artists"] = len(self.artists)
+        return output
+
+
 
 
 
@@ -39,9 +51,9 @@ def main():
     investigator = Investigator()
 
     for series in df.iterrows():
-        investigator.proccess_row(series)
+        investigator.proccess_row(series[1])
 
-    print(investigator.__dict__)
+    print(investigator.generate_statistics())
 
 if __name__ == "__main__":
     main()
