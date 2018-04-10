@@ -12,7 +12,6 @@ source ./.virtualenv/bin/activate py35
 printf "Installing prerequisites\n\n"
 pip3 install -r requirements.txt
 
-cd application
 printf "\nRunning application\n\n"
 
 SCRIPT=$1
