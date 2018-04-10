@@ -9,6 +9,8 @@ Usage:
 import sys
 import argparse
 import pandas as pd
+import math
+from collections import defaultdict, OrderedDict
 
 class Investigator(object):
     """Utility class for calculating statistics on a data set."""
@@ -17,20 +19,40 @@ class Investigator(object):
         """Initializes basic statistics."""
         self.entry_count = 0
         self.artists = set([])
+        self.genres = defaultdict(int)
+        self.word_counts = defaultdict(int)
+        self.year_counts = defaultdict(int)
 
     def proccess_row(self, row):
         """Proccesses a pandas series obect."""
         self.entry_count += 1
         self.artists.add(row["artist_id"])
+        self.genres[row["genre"]]+=1
+        count = Investigator.__count_words(row["lyrics"])
+        self.word_counts[count]+=1
+        self.year_counts[row["year"]]+=1
+
+    @staticmethod
+    def __count_words(bow):
+        """counts the unique words in a bag of words format"""
+        if (type(bow) == str):
+            return len(bow.split())
+        return 0
+
+
 
     def generate_statistics(self):
         """Gives a dict of the most important statistics of the dataset."""
         output = {}
         output["entry_count"] = self.entry_count
         output["unique_artists"] = len(self.artists)
+        output["genre_counts"] = dict(self.genres)
+        output["year_counts"] = sorted(
+                self.year_counts.items(),
+                key=lambda k_v : k_v[1])
+        output["word_frequencies"] = dict(self.word_counts)
+
         return output
-
-
 
 
 
