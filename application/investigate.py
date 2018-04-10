@@ -21,8 +21,8 @@ class Investigator(object):
         self.year_counts = defaultdict(int)
         self.durations = []
 
-    def proccess_row(self, row):
-        """Proccesses a pandas series obect."""
+    def process_row(self, row):
+        """Procceses a pandas series obect."""
         self.entry_count += 1
         self.artists.add(row["artist_id"])
         self.genres[row["genre"]] += 1
@@ -69,7 +69,7 @@ def main():
     investigator = Investigator()
 
     for series in data_frame.iterrows():
-        investigator.proccess_row(series[1])
+        investigator.process_row(series[1])
 
     print(investigator.generate_statistics())
 
