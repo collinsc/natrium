@@ -9,6 +9,19 @@ import sys
 import argparse
 import pandas as pd
 
+class Investigator(object):
+    """Utility class for calculating statistics on a data set."""
+
+    def __init__(self):
+        """Initializes basic statistics."""
+        self.entry_count = 0
+
+    def proccess_row(self, row):
+        """Proccesses a pandas series obect."""
+        self.entry_count += 1
+
+
+
 
 def main():
     """The executable to read in the specified data file and perform the 
@@ -20,8 +33,15 @@ def main():
     args = parser.parse_args()
 
     #read the dataframe in memory friendly chunks
-    reader = pd.read_csv(args.input_file, iterator=True, chunksize=)
+    reader = pd.read_csv(args.input_file, iterator=True, chunksize=512)
     df = pd.concat(reader, ignore_index=True)
+
+    investigator = Investigator()
+
+    for series in df.iterrows():
+        investigator.proccess_row(series)
+
+    print(investigator.__dict__)
 
 if __name__ == "__main__":
     main()
