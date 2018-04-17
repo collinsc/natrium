@@ -25,7 +25,7 @@ def main():
         lyrics_c.execute('SELECT * FROM words')
         count = 1
         for word in lyrics_c.fetchall():
-            lyrics_writec.execute('INSERT INTO words_indexed VALUES(?, ?)', (id, word[0]))
+            lyrics_writec.execute('INSERT INTO words_indexed VALUES(?, ?)', (count, word[0]))
             count += 1
 
         lyrics_db.commit()

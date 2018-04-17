@@ -46,6 +46,11 @@ def main():
                                      [row['msd_id']])
                     lyrics = lyrics_c.fetchall()
 
+                    # Skip if we don't have lyrics
+                    if not lyrics:
+                        print("No lyrics, skipping")
+                        continue
+
                     # Convert the lyrics into the desired format
                     for lyric in lyrics:
                         words_c.execute('SELECT number FROM words_indexed WHERE word LIKE ?',
