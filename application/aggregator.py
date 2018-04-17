@@ -15,7 +15,7 @@ def main():
     Executes the aggregation procedure pulling data from databases into one CSV.
     :return:
     """
-    pd.DataFrame(columns=HEADERS).to_csv('../aggregated.csv')
+    pd.DataFrame(columns=HEADERS).to_csv('../aggregated.csv', index=False)
 
     with open('../tagtraum_genre.cls', mode='r') as genre_map:
         genre_reader = csv.DictReader(genre_map, delimiter='\t')
@@ -70,7 +70,7 @@ def main():
                     print("Valid entry # {}".format(valid_count))
                     with open('../aggregated.csv', mode='a') as out_csv:
                         # Output to CSV
-                        pd.DataFrame(data=[params_towrite], columns=HEADERS).to_csv(out_csv, header=False)
+                        pd.DataFrame(data=[params_towrite], columns=HEADERS).to_csv(out_csv, header=False, index=False)
 
                     if valid_count >= 10:
                         break
