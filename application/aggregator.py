@@ -15,7 +15,7 @@ def main():
     Executes the aggregation procedure pulling data from databases into one CSV.
     :return:
     """
-    data = []
+    pd.DataFrame(columns=HEADERS).to_csv('../aggregated.csv')
 
     with open('../tagtraum_genre.cls', mode='r') as genre_map:
         genre_reader = csv.DictReader(genre_map, delimiter='\t')
@@ -26,14 +26,19 @@ def main():
                 msd_c = msd_db.cursor()
 
                 # Restriction for testing purposes
-                count = 0
+                total_count = 0
+                valid_count = 0
 
                 for row in genre_reader:
-                    print(row['msd_id'])
+                    total_count += 1
+                    print()
+                    print("Entry # {}".format(total_count))
                     msd_c.execute('SELECT * FROM songs WHERE track_id LIKE ?', [row['msd_id']])
                     song = msd_c.fetchall()
                     if not song:
                         continue
+
+                    print(row['msd_id'])
 
                     # Make a list out of the song metadata
                     params_towrite = list(song[0])
@@ -59,15 +64,16 @@ def main():
 
                     # Add the lyrics as the last parameter
                     params_towrite.append(lyrics_towrite)
-                    data.append(params_towrite)
 
                     # Restrict for testing purposes
-                    count += 1
-                    if count >= 10:
-                        break
+                    valid_count += 1
+                    print("Valid entry # {}".format(valid_count))
+                    with open('../aggregated.csv', mode='a') as out_csv:
+                        # Output to CSV
+                        pd.DataFrame(data=[params_towrite], columns=HEADERS).to_csv(out_csv, header=False)
 
-        # Output to CSV
-        pd.DataFrame(data=data, columns=HEADERS).to_csv('../aggregated.csv')
+                    if valid_count >= 10:
+                        break
 
 
 if __name__ == "__main__":
