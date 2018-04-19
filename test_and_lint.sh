@@ -5,4 +5,5 @@ pytest
 echo
 echo "================================== pylint =================================="
 echo
-pylint application/*.py tests/*.py
+pylint application/*.py application/visualization/*.py application/preprocessing/*.py tests/*.py 
+
