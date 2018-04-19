@@ -1,7 +1,6 @@
 import pandas as pd
 import sys
 import numpy
-import matplotlib.pyplot as plt
 import json
 import util.top_words as top_words
 import nltk
@@ -15,7 +14,10 @@ def __get_lyrics(song):
 
     # Split into the word-count pairs, and split those pairs into an array as well and convert strings to numbers
     # e.g. [[1,2], [3,1]] is two occurences of the #1 word and one occurence of the #3 word
-    return [[int(y) for y in x.split(':')] for x in lyrics_str.split()]
+    lyrics = [[int(y) for y in x.split(':')] for x in lyrics_str.split()]
+
+    # finally convert to zero based so we can index an array
+    return [(x[0]-1, x[1]) for x in lyrics]
 
 # helper to create percentage histogram
 def __get_frequency_histogram(values):
@@ -61,6 +63,7 @@ def calculate_word_tags(frame, genre_data, song_data):
             part_of_speech = nltk_helper.get_word_tag(top_words.unstemmed[pair[0]])
             if(part_of_speech):
                 song_parts.append(part_of_speech.lower())
+
         if(not song_parts):
              continue
 
@@ -161,9 +164,13 @@ def main():
          
          # calculate all the interesting features
          calculate_duration(frame, genre_data[genre], song_data)
+         print('25%')
          calculate_word_tags(frame, genre_data[genre], song_data)
+         print('50%')
          calculate_popular_words(frame, genre_data[genre], song_data)
-         calculate_rhymes(frame, genre_data[genre], song_data)
+         print('75%')
+         #calculate_rhymes(frame, genre_data[genre], song_data)
+         print('100%')
          
     with open('genre_data.txt', 'w') as f:
         f.write(json.dumps(genre_data, indent=4))
