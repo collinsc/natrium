@@ -143,10 +143,14 @@ def calculate_rhymes(frame, genre_data, song_data):
 def main():
     genre_data = {}
     song_data = {}
+
+    print('reading csv file from stdin')
     data_frame = pd.read_csv(sys.stdin)
 
     # sort by genre
+    print('sorting by genre')
     for genre, frame in data_frame.groupby('genre'):
+         print('processing genre called ' + genre)
          # initialize genre structs
          genre_data[genre] = {}
 
@@ -161,10 +165,11 @@ def main():
          calculate_popular_words(frame, genre_data[genre], song_data)
          calculate_rhymes(frame, genre_data[genre], song_data)
          
+    with open('genre_data.txt', 'w') as f:
+        f.write(json.dumps(genre_data, indent=4))
 
-    print(json.dumps(genre_data, indent=4))
-    print('\n\n\n\n\n')
-    print(json.dumps(song_data, indent=4))
+    with open('song_data.txt', 'w') as f:
+        f.write(json.dumps(song_data, indent=4))
 
 
 if __name__ == '__main__':
