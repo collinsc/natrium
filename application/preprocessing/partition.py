@@ -5,10 +5,9 @@ Usage:
     python3 remove_columns.py <input_file> <output_file> <list of space delimited collumn labels>
 """
 
+import argparse
 import pandas as pd
 import numpy as np
-import argparse
-import random
 
 def ratio_check(val):
     """Gives if a floating point number is a valid ratio"""
@@ -18,6 +17,7 @@ def ratio_check(val):
     return f_val
 
 def main():
+    """Partitions the data based on user ratio."""
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -25,7 +25,8 @@ def main():
         type=argparse.FileType("r"),
         help="The path of the file to read in.")
 
-    parser.add_argument("ratio",
+    parser.add_argument(
+        "ratio",
         type=float,
         help="The ratio of how to much of the data we want to train with.")
 
@@ -34,7 +35,7 @@ def main():
         type=argparse.FileType("w"),
         default="train.csv",
         help="The path of the training file to write to.")
-    
+
     parser.add_argument(
         "--testing_file",
         type=argparse.FileType("w"),
@@ -43,14 +44,14 @@ def main():
 
 
     args = parser.parse_args()
-    
+
     #read the dataframe in memory friendly chunks
     reader = pd.read_csv(args.input_file, iterator=True, chunksize=512)
     data_frame = pd.concat(reader, ignore_index=True)
 
     #create neccessary data structures
     print("Columns in Dataset:", list(data_frame))
-    entry_num =data_frame.shape[0]
+    entry_num = data_frame.shape[0]
     print("Number of entries:", entry_num)
     print("Ratio:", args.ratio)
     train = pd.DataFrame(columns=data_frame.columns)
