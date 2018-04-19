@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-"""Script for partitioning groomed data set into a training and testing 
+"""Script for partitioning groomed data set into a training and testing
 
 Usage:
     python3 remove_columns.py <input_file> <output_file> <list of space delimited collumn labels>
@@ -21,26 +21,25 @@ def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-           "input_file",
-           type=argparse.FileType("r"),
-           help="The path of the file to read in.")
+        "input_file",
+        type=argparse.FileType("r"),
+        help="The path of the file to read in.")
 
     parser.add_argument("ratio",
-            type=float,
-
-            help="The ratio of how to much of the data we want to train with.")
+        type=float,
+        help="The ratio of how to much of the data we want to train with.")
 
     parser.add_argument(
-           "--training_file",
-           type=argparse.FileType("w"),
-           default="train.csv",
-           help="The path of the training file to write to.")
+        "--training_file",
+        type=argparse.FileType("w"),
+        default="train.csv",
+        help="The path of the training file to write to.")
     
     parser.add_argument(
-           "--testing_file",
-           type=argparse.FileType("w"),
-           default="test.csv",
-           help="The path of the testing file to write to.")
+        "--testing_file",
+        type=argparse.FileType("w"),
+        default="test.csv",
+        help="The path of the testing file to write to.")
 
 
     args = parser.parse_args()

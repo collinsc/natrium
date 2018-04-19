@@ -111,4 +111,5 @@ msd_meta.db
 aggregated.csv
 
 
-
+#pandas files
+*.pkl

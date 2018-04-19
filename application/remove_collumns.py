@@ -36,7 +36,7 @@ def main():
     print("Removing Collumns: ", args.column_labels)
     confirmation = input("Confirm Y/N: ")
     if confirmation == "Y":
-        data_frame.drop(columns=args.column_labels).to_csv(args.output_file)
+        data_frame.drop(columns=args.column_labels).to_pickle(args.output_file.name)
         print("removed")
 
 if __name__ == "__main__":
