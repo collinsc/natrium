@@ -46,8 +46,7 @@ def main():
     args = parser.parse_args()
 
     #read the dataframe in memory friendly chunks
-    reader = pd.read_csv(args.input_file, iterator=True, chunksize=512)
-    data_frame = pd.concat(reader, ignore_index=True)
+    data_frame = pd.read_pickle(args.input_file.name)
 
     #create neccessary data structures
     print("Columns in Dataset:", list(data_frame))
@@ -62,8 +61,8 @@ def main():
     partition_idx = int(entry_num*args.ratio)
     train, test = np.split(data_frame, [partition_idx])
 
-    train.to_csv(args.training_file)
-    test.to_csv(args.testing_file)
+    train.to_pickle(args.training_file.name)
+    test.to_pickle(args.testing_file.name)
 
     print("Success")
     print("Training entries:", train.shape[0])
