@@ -6,7 +6,7 @@ python3 -m venv ./.virtualenv
 
 printf "\nRunning virtual environment\n\n"
 chmod u+x ./.virtualenv/bin/activate
-source ./.virtualenv/bin/activate py35
+source ./.virtualenv/bin/activate 
 
 
 printf "Installing prerequisites\n\n"
