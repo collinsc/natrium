@@ -5,7 +5,6 @@ import json
 import util.top_words as top_words
 import nltk
 import util.nltk_helper as nltk_helper
-import pronouncing
 from collections import Counter
 
 # helper function to parse lyrics string in the csv
@@ -18,6 +17,13 @@ def __get_lyrics(song):
 
     # finally convert to zero based so we can index an array
     return [(x[0]-1, x[1]) for x in lyrics]
+
+# helper to get count of lyrics
+def __get_word_count(lyrics):
+    total = 0
+    for word in lyrics:
+        total += word[1]
+    return total
 
 # helper to create percentage histogram
 def __get_frequency_histogram(values):
@@ -58,26 +64,21 @@ def calculate_word_tags(frame, genre_data, song_data):
 
         lyrics = __get_lyrics(song)
 
-        song_parts = []
+        speech_counter = Counter()
         for pair in lyrics:
             part_of_speech = nltk_helper.get_word_tag(top_words.unstemmed[pair[0]])
             if(part_of_speech):
-                song_parts.append(part_of_speech.lower())
+                speech_counter[part_of_speech.lower()] += pair[1]
 
-        if(not song_parts):
-             continue
+        counts = [speech_counter[x] for x in tag_list]
+        frequencies = [x/__get_word_count(lyrics) for x in counts]
 
-        values, counts = numpy.unique(song_parts, return_counts=True)
-        values, counts = values.tolist(), counts.tolist()
-        frequencies = [x/len(lyrics) for x in counts]
+        for tag, frequency in zip(tag_list, frequencies):
+            genre_parts[tag].append(frequency)
 
-        for value, frequency in zip(values, frequencies):
-            genre_parts[value].append(frequency)
-
-        song_data[song_name]['parts_of_speech'] = dict(zip(values, frequencies))
+        song_data[song_name]['parts_of_speech'] = dict(zip(tag_list, frequencies))
 
     for tag in tag_list:
-        hist = numpy.histogram(genre_parts[tag], bins=numpy.linspace(0, 1, 11))
         genre_data[tag.lower() + '_hist'] = __get_frequency_histogram(genre_parts[tag])
 
 
@@ -111,7 +112,7 @@ def calculate_popular_words(frame, genre_data, song_data):
 
     # extract top words and convert to percentage of total words
     top_lyrics = word_popularity.most_common(25)
-    genre_data['top_words'] = [{'word':x[0], 'avg_freq':x[1]/song_count/len(lyrics)} for x in top_lyrics]
+    genre_data['top_words'] = [{'word':x[0], 'avg_freq':x[1]/song_count/__get_word_count(lyrics)} for x in top_lyrics]
 
 
 # calculates rhymes based off what the pronouncing library says
@@ -131,16 +132,21 @@ def calculate_rhymes(frame, genre_data, song_data):
         lyrics = __get_lyrics(song)
         for idx, word in enumerate(lyrics):
             for word_cmp in lyrics[idx+1:]:
-                word_str = top_words.unstemmed[word[0]]
-                word_cmp_str = top_words.unstemmed[word_cmp[0]]
-                value = 1 if word_str in pronouncing.rhymes(word_cmp_str) else 0
+                word_str1 = top_words.unstemmed[word[0]]
+                word_str2 = top_words.unstemmed[word_cmp[0]]
+                total_count = word[1] + word_cmp[1]
+                value = total_count if nltk_helper.check_rhyme(word_str1, word_str2) else 0
                 rhyme_value += value
 
-        rhyme_value = rhyme_value / len(lyrics)
+        rhyme_value = rhyme_value / __get_word_count(lyrics)
         rhyme_frequencies.append(rhyme_value)
         song_data[song_name]['rhyme_value'] = rhyme_value
 
-    genre_data['rhyme_hist'] = __get_frequency_histogram(rhyme_frequencies)
+    hist = numpy.histogram(rhyme_frequencies)
+    genre_data['rhyme__hist'] = {
+        'frequencies': hist[0].tolist(),
+        'bin_edges': hist[1].tolist()
+    }
 
 
 def main():
@@ -169,7 +175,7 @@ def main():
          print('50%')
          calculate_popular_words(frame, genre_data[genre], song_data)
          print('75%')
-         #calculate_rhymes(frame, genre_data[genre], song_data)
+         calculate_rhymes(frame, genre_data[genre], song_data)
          print('100%')
          
     with open('genre_data.txt', 'w') as f:
