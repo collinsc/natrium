@@ -1,6 +1,6 @@
 import pronouncing
 import nltk 
-import util.top_words as top_words
+from . import top_words
 
 
 print('loading nltk.corpus.brown')
