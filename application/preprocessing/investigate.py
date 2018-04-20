@@ -6,6 +6,7 @@ Usage:
     python3 investigate.py <filename>"""
 
 import argparse
+import os.path
 from collections import defaultdict
 import pandas as pd
 
@@ -21,15 +22,15 @@ class Investigator(object):
         self.year_counts = defaultdict(int)
         self.durations = []
 
-    def process_row(self, row):
+    def process_row(self, data, label):
         """Procceses a pandas series obect."""
         self.entry_count += 1
-        self.artists.add(row["artist_name"])
-        self.genres[row["genre"]] += 1
-        count = Investigator.__count_words(row["lyrics"])
+        self.artists.add(data["artist_name"])
+        self.genres[label["genre"]] += 1
+        count = Investigator.__count_words(data["lyrics"])
         self.word_counts[count] += 1
-        self.year_counts[row["year"]] += 1
-        self.durations.append(row["duration"])
+        self.year_counts[data["year"]] += 1
+        self.durations.append(data["duration"])
 
     @staticmethod
     def __count_words(bow):
@@ -60,24 +61,32 @@ def main():
     parser.add_argument(
         "input_file",
         type=argparse.FileType("r"),
-        help="The path of the file to read in.")
+        help="The path of the data file to read in.")
     parser.add_argument(
-        "output_file",
-        type=argparse.FileType("w"),
-        help="The path of the file to write to.")
+        "input_label_file",
+        type=argparse.FileType("r"),
+        help="The path of the label file to read in.")
+    parser.add_argument(
+        "output_path",
+        default="",
+        help="The path to write to.")
 
     args = parser.parse_args()
 
     #read the dataframe in memory friendly chunks
     data_frame = pd.read_pickle(args.input_file.name)
+    label_frame = pd.read_pickle(args.input_label_file.name)
 
     investigator = Investigator()
 
-    for series in data_frame.iterrows():
-        investigator.process_row(series[1])
+    for series in zip(data_frame.iterrows(), label_frame.iterrows()):
+        investigator.process_row(series[0][1], series[1][1])
 
     series = investigator.generate_statistics()
-    series.to_pickle(args.output_file.name)
+
+
+    filename = os.path.basename(args.input_file.name)[:-4] + "_stats.pkl"
+    series.to_pickle(os.path.join(args.output_path, filename))
 
 if __name__ == "__main__":
     main()
