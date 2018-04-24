@@ -14,6 +14,7 @@ import numpy as np
 def generate_hist(data: list, filename: str):
     plt.close()
     axis_nums = np.arange(len(data))
+    plt.figure(figsize=(11, 7))
     plt.bar(axis_nums, [x[1] for x in data], align='center', width=1.0)
     plt.title("Genre Distribution", fontsize=18)
     plt.xlabel("Genre")
@@ -21,7 +22,7 @@ def generate_hist(data: list, filename: str):
     plt.xticks(axis_nums, [x[0] for x in data], fontsize=6)
     plt.xticks(rotation=75)
     plt.yticks(fontsize=10)
-    plt.savefig(filename)
+    plt.savefig(filename, dpi=480)
 
 
 def generate_pie(data: list, filename: str):
@@ -32,7 +33,7 @@ def generate_pie(data: list, filename: str):
     plt.close()
     plt.pie([x[1] for x in pie_values], startangle=90, labels=[x[0] for x in pie_values], rotatelabels=45)
     # plt.legend(labels=[x[0] for x in pie_values], loc='best')
-    plt.savefig(filename)
+    plt.savefig(filename, dpi=480)
 
 
 def main():
