@@ -1,3 +1,4 @@
+import argparse
 import pandas as pd
 import sys, os
 import numpy
@@ -150,11 +151,20 @@ def calculate_rhymes(frame, genre_data, song_data):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "input_file",
+        type=argparse.FileType("r"),
+        help="The path of the file to read in.")
+
+    args = parser.parse_args()
+
     genre_data = {}
     song_data = {}
 
-    print('reading pickle file from data/groomed_aggregated.pkl')
-    data_frame = pd.read_pickle('data/groomed_aggregated.pkl')
+    print('reading pickle file from ' + args.input_file.name)
+    data_frame = pd.read_pickle(args.input_file.name)
 
     # sort by genre
     print('sorting by genre')
