@@ -96,7 +96,7 @@ def main():
     
     plt.figure(figsize=(6.4,4), dpi=100)
     plt.hist(count_data, 10, (0, 1000))
-    plt.title('word counts')
+    plt.title('Word Counts')
     plt.ylabel('song count')
     plt.xlabel('word count')
     plt.savefig('graphs/counts_overall.png')
@@ -104,7 +104,7 @@ def main():
      
     plt.figure(figsize=(6.4,4), dpi=100)
     plt.hist(rhyme_data, 10, (0, 3))
-    plt.title('rhyming score')
+    plt.title('Rhyming Score')
     plt.ylabel('song count')
     plt.xlabel('rhyming score')
     plt.savefig('graphs/rhymes_overall.png')
@@ -112,7 +112,7 @@ def main():
      
     plt.figure(figsize=(6.4,4), dpi=100)
     plt.hist(noun_data, 10, (0, .5))
-    plt.title('noun proportion')
+    plt.title('Noun Proportion')
     plt.ylabel('song count')
     plt.xlabel('noun proportion')
     plt.savefig('graphs/nouns_overall.png')
@@ -120,7 +120,7 @@ def main():
     
     plt.figure(figsize=(6.4,4), dpi=100)
     plt.hist(verb_data, 10, (0, .5))
-    plt.title('verb proportion')
+    plt.title('Verb Proportion')
     plt.ylabel('song count')
     plt.xlabel('verb proportion')
     plt.savefig('graphs/verbs_overall.png')
@@ -128,7 +128,7 @@ def main():
     
     plt.figure(figsize=(6.4,4), dpi=100)
     plt.hist(adjective_data, 10, (0, .2))
-    plt.title('adjective proportion')
+    plt.title('Adjective Proportion')
     plt.ylabel('song count')
     plt.xlabel('adjective proportion')
     plt.savefig('graphs/adjectives_overall.png')
@@ -136,7 +136,7 @@ def main():
     
     plt.figure(figsize=(6.4,4), dpi=100)
     plt.hist(adverb_data, 10, (0, .3))
-    plt.title('adverb proportion')
+    plt.title('Adverb Proportion')
     plt.ylabel('song count')
     plt.xlabel('adverbs proportion')
     plt.savefig('graphs/adverbs_overall.png')
@@ -144,7 +144,7 @@ def main():
     
     plt.figure(figsize=(6.4,4), dpi=100)
     plt.hist(year_data, 10, (1950, 2010))
-    plt.title('release years')
+    plt.title('Release Years')
     plt.ylabel('song count')
     plt.xlabel('release year')
     plt.savefig('graphs/years_overall.png')
@@ -152,7 +152,7 @@ def main():
     
     plt.figure(figsize=(6.4,4), dpi=100)
     plt.hist(duration_data, 10, (0, 800))
-    plt.title('song duration')
+    plt.title('Song Duration')
     plt.ylabel('song count')
     plt.xlabel('duration (seconds)')
     plt.savefig('graphs/duration_overall.png')
@@ -164,7 +164,7 @@ def main():
     plt.boxplot(\
         [rhyme_data_genres[genre] for genre in rhyme_data_genres],\
         labels = [genre for genre in rhyme_data_genres])
-    plt.title('rhyming score by genre')
+    plt.title('Rhyming Score By Genre')
     plt.ylabel('rhyming score')
     plt.savefig('graphs/rhymes_by_genre.png')
     
@@ -173,7 +173,7 @@ def main():
     plt.boxplot(\
         [noun_data_genres[genre] for genre in noun_data_genres],\
         labels = [genre for genre in noun_data_genres])
-    plt.title('noun proportion by genre')
+    plt.title('Noun Proportion By Genre')
     plt.ylabel('noun proportion')
     plt.savefig('graphs/nouns_by_genre.png')
     
@@ -182,7 +182,7 @@ def main():
     plt.boxplot(\
         [verb_data_genres[genre] for genre in verb_data_genres],\
         labels = [genre for genre in verb_data_genres])
-    plt.title('verb proportion by genre')
+    plt.title('Verb Proportion By Genre')
     plt.ylabel('verb proportion')
     plt.savefig('graphs/verbs_by_genre.png')
     
@@ -191,7 +191,7 @@ def main():
     plt.boxplot(\
         [adjective_data_genres[genre] for genre in adjective_data_genres],\
         labels = [genre for genre in adjective_data_genres])
-    plt.title('adjective proportion by genre')
+    plt.title('Adjective Proportion By Genre')
     plt.ylabel('adjective proportion')
     plt.savefig('graphs/adjectives_by_genre.png')
     
@@ -200,7 +200,7 @@ def main():
     plt.boxplot(\
         [adverb_data_genres[genre] for genre in adverb_data_genres],\
         labels = [genre for genre in adverb_data_genres])
-    plt.title('adverb proportion by genre')
+    plt.title('Adverb Proportion By Genre')
     plt.ylabel('adverb proportion')
     plt.savefig('graphs/adverbs_by_genre.png')
     
@@ -209,7 +209,7 @@ def main():
     plt.boxplot(\
         [year_data_genres[genre] for genre in year_data_genres],\
         labels = [genre for genre in year_data_genres])
-    plt.title('release years by genre')
+    plt.title('Release Years By Genre')
     plt.ylabel('release year')
     plt.savefig('graphs/years_by_genre.png')
     
@@ -218,7 +218,7 @@ def main():
     plt.boxplot(\
         [duration_data_genres[genre] for genre in duration_data_genres],\
         labels = [genre for genre in duration_data_genres])
-    plt.title('durations by genre')
+    plt.title('Durations By Genre')
     plt.ylabel('duration (seconds)')
     plt.savefig('graphs/durations_by_genre.png')
 
