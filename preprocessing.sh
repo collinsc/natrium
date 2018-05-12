@@ -24,13 +24,13 @@ printf "\n%s\n" "${BLUE}Removing Columns${END}"
 python3 application/preprocessing/remove_columns.py $INPUT_FILE .tmp.pkl $COLS 
 
 printf "\n%s\n" "${BLUE}Partitioning Data${END}"
-python3 application/preprocessing/partition.py .tmp.pkl 0.9 --training_file data/train.pkl --testing_file data/test.pkl
+python3 application/preprocessing/partition.py .tmp.pkl data 0.9 
 
 printf "\n%s\n" "${BLUE}Diagnostics Training Set${END}"
-python3 application/preprocessing/investigate.py data/train.pkl data/train_stats.pkl 
+python3 application/preprocessing/investigate.py data/train.pkl data/train_label.pkl data 
 
 printf "\n%s\n" "${BLUE}Diagnostics Test Set${END}"
-python3 application/preprocessing/investigate.py data/test.pkl data/test_stats.pkl 
+python3 application/preprocessing/investigate.py data/test.pkl data/test_label.pkl data 
 
 
 rm .tmp.pkl
