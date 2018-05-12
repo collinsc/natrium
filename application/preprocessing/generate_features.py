@@ -78,6 +78,7 @@ def calculate_word_tags(frame, genre_data, song_data):
             genre_parts[tag].append(frequency)
 
         song_data[song_name]['parts_of_speech'] = dict(zip(tag_list, frequencies))
+        song_data[song_name]['word_count'] = __get_word_count(lyrics) # TODO move later to own section?
 
     for tag in tag_list:
         genre_data[tag.lower() + '_hist'] = __get_frequency_histogram(genre_parts[tag])
@@ -86,7 +87,7 @@ def calculate_word_tags(frame, genre_data, song_data):
 # save durations of songs in the songs and a histogram in the genre
 def calculate_duration(frame, genre_data, song_data):
     # limit columns to the ones we care about
-    frame = frame[['track_id', 'duration']]
+    frame = frame[['track_id', 'duration', 'year']]
     durations = list(frame['duration'])
 
     hist = numpy.histogram(durations)
@@ -99,6 +100,7 @@ def calculate_duration(frame, genre_data, song_data):
     for index, song in frame.iterrows():
         song_name = song['track_id']
         song_data[song_name]['duration'] = song['duration']
+        song_data[song_name]['release_year'] = song['year'] # TODO move later to own section?
 
 
 # calculates the top words for a genre and saves them to the genre
