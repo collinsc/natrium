@@ -94,7 +94,7 @@ def main():
         duration_data_genres[song['genre']].append(duration)
         
     
-    plt.figure(figsize=(6.4,4), dpi=100)
+    plt.figure(figsize=(6.4,3.8), dpi=100)
     plt.hist(count_data, 10, (0, 1000))
     plt.title('Word Counts')
     plt.ylabel('song count')
@@ -102,7 +102,7 @@ def main():
     plt.savefig('graphs/counts_overall.png')
     
      
-    plt.figure(figsize=(6.4,4), dpi=100)
+    plt.figure(figsize=(6.4,3.8), dpi=100)
     plt.hist(rhyme_data, 10, (0, 3))
     plt.title('Rhyming Score')
     plt.ylabel('song count')
@@ -110,7 +110,7 @@ def main():
     plt.savefig('graphs/rhymes_overall.png')
     
      
-    plt.figure(figsize=(6.4,4), dpi=100)
+    plt.figure(figsize=(6.4,3.8), dpi=100)
     plt.hist(noun_data, 10, (0, .5))
     plt.title('Noun Proportion')
     plt.ylabel('song count')
@@ -118,7 +118,7 @@ def main():
     plt.savefig('graphs/nouns_overall.png')
     
     
-    plt.figure(figsize=(6.4,4), dpi=100)
+    plt.figure(figsize=(6.4,3.8), dpi=100)
     plt.hist(verb_data, 10, (0, .5))
     plt.title('Verb Proportion')
     plt.ylabel('song count')
@@ -126,7 +126,7 @@ def main():
     plt.savefig('graphs/verbs_overall.png')
     
     
-    plt.figure(figsize=(6.4,4), dpi=100)
+    plt.figure(figsize=(6.4,3.8), dpi=100)
     plt.hist(adjective_data, 10, (0, .2))
     plt.title('Adjective Proportion')
     plt.ylabel('song count')
@@ -134,7 +134,7 @@ def main():
     plt.savefig('graphs/adjectives_overall.png')
     
     
-    plt.figure(figsize=(6.4,4), dpi=100)
+    plt.figure(figsize=(6.4,3.8), dpi=100)
     plt.hist(adverb_data, 10, (0, .3))
     plt.title('Adverb Proportion')
     plt.ylabel('song count')
@@ -142,7 +142,7 @@ def main():
     plt.savefig('graphs/adverbs_overall.png')
     
     
-    plt.figure(figsize=(6.4,4), dpi=100)
+    plt.figure(figsize=(6.4,3.8), dpi=100)
     plt.hist(year_data, 10, (1950, 2010))
     plt.title('Release Years')
     plt.ylabel('song count')
@@ -150,7 +150,7 @@ def main():
     plt.savefig('graphs/years_overall.png')
     
     
-    plt.figure(figsize=(6.4,4), dpi=100)
+    plt.figure(figsize=(6.4,3.8), dpi=100)
     plt.hist(duration_data, 10, (0, 800))
     plt.title('Song Duration')
     plt.ylabel('song count')
@@ -160,7 +160,7 @@ def main():
     
     
     
-    plt.figure(figsize=(6.4,4), dpi=100)
+    plt.figure(figsize=(6.4,3.8), dpi=100)
     plt.boxplot(\
         [rhyme_data_genres[genre] for genre in rhyme_data_genres],\
         labels = [genre for genre in rhyme_data_genres])
@@ -169,7 +169,7 @@ def main():
     plt.savefig('graphs/rhymes_by_genre.png')
     
     
-    plt.figure(figsize=(6.4,4), dpi=100)
+    plt.figure(figsize=(6.4,3.8), dpi=100)
     plt.boxplot(\
         [noun_data_genres[genre] for genre in noun_data_genres],\
         labels = [genre for genre in noun_data_genres])
@@ -178,7 +178,7 @@ def main():
     plt.savefig('graphs/nouns_by_genre.png')
     
     
-    plt.figure(figsize=(6.4,4), dpi=100)
+    plt.figure(figsize=(6.4,3.8), dpi=100)
     plt.boxplot(\
         [verb_data_genres[genre] for genre in verb_data_genres],\
         labels = [genre for genre in verb_data_genres])
@@ -187,7 +187,7 @@ def main():
     plt.savefig('graphs/verbs_by_genre.png')
     
     
-    plt.figure(figsize=(6.4,4), dpi=100)
+    plt.figure(figsize=(6.4,3.8), dpi=100)
     plt.boxplot(\
         [adjective_data_genres[genre] for genre in adjective_data_genres],\
         labels = [genre for genre in adjective_data_genres])
@@ -196,7 +196,7 @@ def main():
     plt.savefig('graphs/adjectives_by_genre.png')
     
     
-    plt.figure(figsize=(6.4,4), dpi=100)
+    plt.figure(figsize=(6.4,3.8), dpi=100)
     plt.boxplot(\
         [adverb_data_genres[genre] for genre in adverb_data_genres],\
         labels = [genre for genre in adverb_data_genres])
@@ -205,7 +205,7 @@ def main():
     plt.savefig('graphs/adverbs_by_genre.png')
     
     
-    plt.figure(figsize=(6.4,4), dpi=100)
+    plt.figure(figsize=(6.4,3.8), dpi=100)
     plt.boxplot(\
         [year_data_genres[genre] for genre in year_data_genres],\
         labels = [genre for genre in year_data_genres])
@@ -214,7 +214,7 @@ def main():
     plt.savefig('graphs/years_by_genre.png')
     
     
-    plt.figure(figsize=(6.4,4), dpi=100)
+    plt.figure(figsize=(6.4,3.8), dpi=100)
     plt.boxplot(\
         [duration_data_genres[genre] for genre in duration_data_genres],\
         labels = [genre for genre in duration_data_genres])
