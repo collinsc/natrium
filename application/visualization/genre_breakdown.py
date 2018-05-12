@@ -22,6 +22,7 @@ def generate_hist(data: list, filename: str):
     plt.xticks(axis_nums, [x[0] for x in data], fontsize=12)
     plt.xticks(rotation=75)
     plt.yticks(fontsize=10)
+    plt.plot([0, 14], [2250, 2250])
     plt.savefig(filename, dpi=480)
 
 
