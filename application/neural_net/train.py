@@ -132,9 +132,9 @@ def main():
     args = parser.parse_args()
     print("Commencing...")
     # initialise the variables
-    learning_rate = 0.5 
-    epochs = 10 
-    batch_size = 100 
+    learning_rate = 0.1 
+    epochs = 1 
+    batch_size = 512 
 
     #Network inputs and outputs
     x_0 = tf.placeholder(tf.float32, [None, 784])
@@ -179,12 +179,13 @@ def main():
         for epoch in range(epochs):
             for i in range(total_batch):
                 batch_x, batch_y = mnist.train.next_batch(batch_size=batch_size)
-                train_summary, train_entropy = sess.run([merged, cross_entropy], feed_dict={x_0: batch_x, label:  batch_y})
+                train_summary, train_entropy, train_accuracy = sess.run([merged, cross_entropy, accuracy], feed_dict={x_0: batch_x, label:  batch_y})
+                print("TRAIN: Entropy at step", i, ":", train_entropy, "Accuracy:", train_accuracy)
                 train_writer.add_summary(train_summary, i)
-                test_summary, test_acc = sess.run([merged, accuracy], feed_dict={x_0: mnist.test.images, label: mnist.test.labels})
-                print("Entropy at step", i, ":", train_entropy)
+                test_summary, test_entropy, test_accuracy = sess.run([merged, cross_entropy, accuracy], feed_dict={x_0: mnist.test.images, label: mnist.test.labels})
+                print("TEST: Entropy at step", i, ":", test_entropy, "Accuracy:", test_accuracy)
                 test_writer.add_summary(test_summary, i)
-            print("Epoch:", (epoch + 1), "cost:", avg_cost)
+            print("Epoch:", (epoch + 1))
         print("Training Finished")
 
 if __name__ == "__main__":

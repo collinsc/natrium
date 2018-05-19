@@ -16,7 +16,7 @@ printf "\nRunning application\n\n"
 
 SCRIPT=$1
 shift
-python3 -m $SCRIPT $@
+python3  $SCRIPT $@
 
 deactivate
 
