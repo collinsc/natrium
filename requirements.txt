@@ -6,3 +6,4 @@ numpy
 pandas
 matplotlib
 pronouncing
+tensorflow == 1.5

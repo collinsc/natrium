@@ -40,5 +40,6 @@ def main():
     data_frame.drop(columns=args.column_labels).to_pickle(args.output_file.name)
     print("removed")
 
+
 if __name__ == "__main__":
     main()
