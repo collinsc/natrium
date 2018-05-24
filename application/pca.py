@@ -28,7 +28,16 @@ def calculate_scree(S):
 
 def plot_scree(scores, cum_scores):
     x = np.linspace(1, scores.shape[0], scores.shape[0])
-    print(x)
+
+    fig, ax = plt.subplots()
+
+    ax.plot(x, scores,label="variance")
+    ax.plot(x, cum_scores, label="cumulative_variance")
+    ax.set(xlabel='Principal Component', ylabel='Variance',
+           title='Scree Plots')
+    ax.legend()
+    plt.show()
+    
         
 
 
