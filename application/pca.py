@@ -103,6 +103,10 @@ def main():
     data_frame = data_frame.drop(columns=["genre", "release_year"])
 
     u, s, v = np.linalg.svd(data_frame, full_matrices = False)
+    ur = np.dot(u, np.diag(s))
+    regular_scores = pd.DataFrame(data=ur, 
+            index = data_frame.index,
+            columns = range(1, ur.shape[1]+1))
 
     scores, cumulative_scores = calculate_scree(s)
     plot_scree(scores, cumulative_scores)
@@ -111,7 +115,7 @@ def main():
     plot_loading_vectors(v2)
 
     plot_features_3d(
-            100, 
+            150, 
             data_frame, 
             labels,
             ["duration", "word_count", "rhyme_value"], 
@@ -119,6 +123,17 @@ def main():
             genre_list, 
             "genre",
             "Duration v. Wordcound v. Rhyme Index")
+
+    plot_features_3d(
+            150, 
+            regular_scores, 
+            labels,
+            [1, 2, 3], 
+            ["", "", ""],
+            genre_list, 
+            "genre",
+            "Vector 1 v. Vector 2 v. Vector 3")
+
     plt.show()
 
 if __name__ == "__main__":
