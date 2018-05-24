@@ -2,9 +2,7 @@ import argparse
 import pandas as pd
 import sys, os
 import numpy
-import json
-from ..util import top_words
-from ..util import nltk_helper
+from  util import top_words, nltk_helper
 import nltk
 from collections import Counter
 
@@ -24,15 +22,12 @@ def __get_word_count(lyrics):
     total = 0
     for word in lyrics:
         total += word[1]
-    return total
+    return total 
 
 # helper to create percentage histogram
 def __get_frequency_histogram(values):
     hist = numpy.histogram(values, bins=numpy.linspace(0, 1, 11))
-    return {
-        'frequencies': hist[0].tolist(),
-        'bin_edges': hist[1].tolist()
-    }
+    return { 'frequencies': hist[0].tolist(), 'bin_edges': hist[1].tolist() }
 
 # calculates the parts of speech the words in a song are (as percentage of total words)
 # for the song, it saves them like the following:
@@ -58,7 +53,7 @@ def calculate_word_tags(frame, genre_data, song_data):
 
     # list of wanted tag types (missing punctuation as that should not be in the dataset it seems)
     tag_list = ['adj', 'adp', 'adv', 'conj', 'det', 'noun', 'num', 'prt', 'pron', 'verb', 'x']
-    genre_parts = dict(zip(tag_list, [[] for _ in range(len(tag_list))]))
+    genre_parts = {tag:[] for tag in tag_list}
 
     for index, song in frame.iterrows():
         song_name = song['track_id']
@@ -75,10 +70,9 @@ def calculate_word_tags(frame, genre_data, song_data):
         frequencies = [x/__get_word_count(lyrics) for x in counts]
 
         for tag, frequency in zip(tag_list, frequencies):
+            song_data.loc[song_name][tag] = frequency
             genre_parts[tag].append(frequency)
-
-        song_data[song_name]['parts_of_speech'] = dict(zip(tag_list, frequencies))
-        song_data[song_name]['word_count'] = __get_word_count(lyrics) # TODO move later to own section?
+        song_data.loc[song_name]['word_count'] = __get_word_count(lyrics) 
 
     for tag in tag_list:
         genre_data[tag.lower() + '_hist'] = __get_frequency_histogram(genre_parts[tag])
@@ -99,8 +93,8 @@ def calculate_duration(frame, genre_data, song_data):
 
     for index, song in frame.iterrows():
         song_name = song['track_id']
-        song_data[song_name]['duration'] = song['duration']
-        song_data[song_name]['release_year'] = song['year'] # TODO move later to own section?
+        song_data.loc[song_name]['duration'] = song['duration']
+        song_data.loc[song_name]['release_year'] = song['year'] # TODO move later to own section?
 
 
 # calculates the top words for a genre and saves them to the genre
@@ -143,7 +137,7 @@ def calculate_rhymes(frame, genre_data, song_data):
 
         rhyme_value = rhyme_value / __get_word_count(lyrics)
         rhyme_frequencies.append(rhyme_value)
-        song_data[song_name]['rhyme_value'] = rhyme_value
+        song_data.loc[song_name]['rhyme_value'] = rhyme_value
 
     hist = numpy.histogram(rhyme_frequencies)
     genre_data['rhyme__hist'] = {
@@ -162,11 +156,14 @@ def main():
 
     args = parser.parse_args()
 
-    genre_data = {}
-    song_data = {}
-
     print('reading pickle file from ' + args.input_file.name)
     data_frame = pd.read_pickle(args.input_file.name)
+
+    genre_data = {}
+    song_data = pd.DataFrame(index=data_frame["track_id"],columns=["genre", "duration", "release_year",
+        'adj', 'adp', 'adv', 'conj', 'det', 'noun', 'num', 'prt', 'pron', 
+        'verb', 'x', "word_count", "rhyme_value"]) 
+
 
     # sort by genre
     print('sorting by genre')
@@ -178,7 +175,7 @@ def main():
          # intialize song structs
          for index, song in frame.iterrows():
              song_name = song['track_id']
-             song_data[song_name] = {'genre': genre}
+             song_data.loc[song_name]["genre"] = genre
          
          # calculate all the interesting features
          calculate_duration(frame, genre_data[genre], song_data)
@@ -189,13 +186,11 @@ def main():
          print('75%')
          calculate_rhymes(frame, genre_data[genre], song_data)
          print('100%')
+
+    pd.DataFrame.from_dict(genre_data).to_pickle("../genre_data.pkl")
+    song_data.infer_objects()
+    song_data.to_pickle("../song_data.pkl")
          
-    with open('data/genre_data.json', 'w') as f:
-        f.write(json.dumps(genre_data, indent=4))
-
-    with open('data/song_data.json', 'w') as f:
-        f.write(json.dumps(song_data, indent=4))
-
 
 if __name__ == '__main__':
     main()
