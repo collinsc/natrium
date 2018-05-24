@@ -97,6 +97,7 @@ def main():
     data_frame = pd.read_pickle(args.input_file.name).infer_objects()
     genre_list = ["Punk", "Electronic","RnB", "Rap", "Country", "Metal", "Pop", "Rock"]
     data_frame = data_frame[data_frame["genre"].isin(genre_list)]
+    print(data_frame.columns)
     center_and_scale(data_frame)
     labels = data_frame["genre"]
 
