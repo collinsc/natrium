@@ -5,6 +5,7 @@ import numpy
 from  util import top_words, nltk_helper
 import nltk
 from collections import Counter
+from collections import defaultdict
 
 # helper function to parse lyrics string in the csv
 def __get_lyrics(song):
@@ -156,8 +157,16 @@ def main():
 
     args = parser.parse_args()
 
+
+    genre_data = {}
+    song_data = {}
+
+    valid_genres = ["Punk", "Electronic", "RnB", "Rap", "Country", "Metal", "Pop", "Rock"]
+
+
     print('reading pickle file from ' + args.input_file.name)
     data_frame = pd.read_pickle(args.input_file.name)
+    data_frame = data_frame[data_frame['genre'].isin(valid_genres)]
 
     genre_data = {}
     song_data = pd.DataFrame(index=data_frame["track_id"],columns=["genre", "duration", "release_year",
@@ -167,7 +176,67 @@ def main():
 
     # sort by genre
     print('sorting by genre')
-    for genre, frame in data_frame.groupby('genre'):
+    groups = data_frame.groupby('genre')
+    
+    # first pass collect word counts per genre. Needed for getting unique and popular
+    # words between genres. (e.g. truck is rather unqiue and popular to country)
+    # stored as such:
+    # {
+    #   word1 : {genre1: .4, genre2: .5, ...},
+    #   word2 : {genre1: .7, genre2: .1, ...},
+    #   ...
+    #   wordn : {genre1: .4, genre2: .5, ...}
+    # }
+    # where the numbers after the genre keys are the average percentage of that
+    # word in that genre.
+    genre_dict_list = [defaultdict(int) for x in range(len(top_words.stemmed))]
+    word_genre_counts = dict(zip(top_words.stemmed, genre_dict_list))
+    for genre, frame in groups:
+        print('calculating genre uses per word for ' + genre)
+        # limit columns to the ones we care about
+        frame = frame[['track_id', 'lyrics']]
+
+        song_count = 0
+        for index, song in frame.iterrows():
+            lyrics = __get_lyrics(song)
+            for word_idx, count in lyrics:
+                word = top_words.stemmed[word_idx]
+                
+                # add the number of occurences of this word, normalized
+                # to the total number of words in the song (to the range [0, 1])
+                word_genre_counts[word][genre] += count/__get_word_count(lyrics)
+            
+            song_count += 1
+        
+        # get the average of normalized word counts 
+        for word in top_words.stemmed:
+            word_genre_counts[word][genre] /= song_count
+
+    most_unique_by_genre = defaultdict(lambda:(-1, -1))
+    for word_idx in word_genre_counts:
+        word = word_genre_counts[word_idx] # remember: of the form {Rock: .1, Country: .2, ...}
+        
+        # list of keys sorted by value
+        ordered_keys = sorted(word, key=word.__getitem__)
+        
+        first_genre = ordered_keys[-1] # genre that uses the word the most
+        second_genre = ordered_keys[-2] # the genre that uses it the second most
+        
+        # skip words that are unlikely
+        #if(word[first_genre] < .0005):
+        #    continue
+        
+        # this disparity ratio will be used to find words that stand out for a genre
+        ratio = word[first_genre] / word[second_genre]
+        
+        if(ratio > most_unique_by_genre[first_genre][1]):
+            most_unique_by_genre[first_genre] = (top_words.stemify(word_idx), ratio, first_genre, word[first_genre], second_genre, word[second_genre])
+    
+    import json # temp
+    print(json.dumps(most_unique_by_genre, indent=4))
+
+    # process features on a per genre basis
+    for genre, frame in groups:
          print('processing genre called ' + genre)
          # initialize genre structs
          genre_data[genre] = {}
