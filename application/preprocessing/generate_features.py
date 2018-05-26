@@ -99,18 +99,17 @@ def calculate_duration(frame, genre_data, song_data):
 
 
 # calculates the top words for a genre and saves them to the genre
-def calculate_popular_words(frame, genre_data, song_data):
-    word_popularity = Counter()
-    song_count = 0
+def calculate_popular_words(frame, genre_data, song_data, genre_top_words, valid_genres):
     for index, song in frame.iterrows():
-        song_count += 1
+        song_name = song['track_id']
         lyrics = __get_lyrics(song)
-        for word in lyrics:
-            word_popularity[word[0]] += word[1]
-
-    # extract top words and convert to percentage of total words
-    top_lyrics = word_popularity.most_common(25)
-    genre_data['top_words'] = [{'word':x[0], 'avg_freq':x[1]/song_count/__get_word_count(lyrics)} for x in top_lyrics]
+        count_per_genre = defaultdict(int)
+        for word_idx, count in lyrics:
+            for genre in valid_genres:
+                count_per_genre[genre] += count if(top_words.stemmed[word_idx] in genre_top_words[genre][0]) else 0
+        for genre in valid_genres:
+            count_per_genre[genre] /= __get_word_count(lyrics) # normalize
+            song_data.loc[song_name]['word_pop_' + genre] = count_per_genre[genre]
 
 
 # calculates rhymes based off what the pronouncing library says
@@ -171,7 +170,9 @@ def main():
     genre_data = {}
     song_data = pd.DataFrame(index=data_frame["track_id"],columns=["genre", "duration", "release_year",
         'adj', 'adp', 'adv', 'conj', 'det', 'noun', 'num', 'prt', 'pron', 
-        'verb', 'x', "word_count", "rhyme_value"]) 
+        'verb', 'x', "word_count", "rhyme_value", 'word_pop_Punk',
+        'word_pop_Electronic', 'word_pop_RnB', 'word_pop_Rap', 'word_pop_Country',
+        'word_pop_Pop', 'word_pop_Rock']) 
 
 
     # sort by genre
@@ -212,7 +213,7 @@ def main():
         for word in top_words.stemmed:
             word_genre_counts[word][genre] /= song_count
 
-    most_unique_by_genre = defaultdict(lambda:(-1, -1))
+    genre_top_words = defaultdict(list)
     for word_idx in word_genre_counts:
         word = word_genre_counts[word_idx] # remember: of the form {Rock: .1, Country: .2, ...}
         
@@ -223,17 +224,26 @@ def main():
         second_genre = ordered_keys[-2] # the genre that uses it the second most
         
         # skip words that are unlikely
-        #if(word[first_genre] < .0005):
-        #    continue
+        if(word[first_genre] < .001):
+            continue
         
         # this disparity ratio will be used to find words that stand out for a genre
         ratio = word[first_genre] / word[second_genre]
         
-        if(ratio > most_unique_by_genre[first_genre][1]):
-            most_unique_by_genre[first_genre] = (top_words.stemify(word_idx), ratio, first_genre, word[first_genre], second_genre, word[second_genre])
+        # give the useful stuff: which word it is and the ratio above the second highest.
+        # Also the follow genre for funzies
+        genre_top_words[first_genre].append((word_idx, ratio, second_genre))
     
+
+    # eliminate it to top N words and sort
+    for genre in valid_genres:
+        N = 3
+        genre_top_words[genre].sort(key=lambda word: word[1], reverse=True)
+        genre_top_words[genre] = genre_top_words[genre][0:N] # limit it
+        genre_top_words[genre] = [x[0] for x in genre_top_words[genre]] # simplify it to just the word
+
     import json # temp
-    print(json.dumps(most_unique_by_genre, indent=4))
+    print(json.dumps(genre_top_words, indent=4))
 
     # process features on a per genre basis
     for genre, frame in groups:
@@ -247,11 +257,11 @@ def main():
              song_data.loc[song_name]["genre"] = genre
          
          # calculate all the interesting features
-         calculate_duration(frame, genre_data[genre], song_data)
+         calculate_popular_words(frame, genre_data[genre], song_data, genre_top_words, valid_genres)
          print('25%')
          calculate_word_tags(frame, genre_data[genre], song_data)
          print('50%')
-         calculate_popular_words(frame, genre_data[genre], song_data)
+         calculate_duration(frame, genre_data[genre], song_data)
          print('75%')
          calculate_rhymes(frame, genre_data[genre], song_data)
          print('100%')
