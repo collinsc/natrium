@@ -63,10 +63,9 @@ def calculate_word_tags(frame, genre_data, song_data):
 
         speech_counter = Counter()
         for pair in lyrics:
-            part_of_speech = nltk_helper.get_word_tag(top_words.unstemmed[pair[0]])
-            if(part_of_speech):
-                speech_counter[part_of_speech.lower()] += pair[1]
-
+            speech_frequencies = nltk_helper.get_word_tag(top_words.unstemmed[pair[0]])
+            for pos, frequency in speech_frequencies.items():
+                speech_counter[pos.lower()] += frequency*pair[1] 
         counts = [speech_counter[x] for x in tag_list]
         frequencies = [x/__get_word_count(lyrics) for x in counts]
 
@@ -120,22 +119,19 @@ def calculate_popular_words(frame, genre_data, song_data, genre_top_words, valid
 # saves the number of rhymes as a percentage (relative to word count) for every song
 # and of course a distribution per genre
 def calculate_rhymes(frame, genre_data, song_data):
-    song_count = 0
     rhyme_frequencies = []
     for index, song in frame.iterrows():
         song_name = song['track_id']
-        song_count += 1
         rhyme_value = 0
         lyrics = __get_lyrics(song)
         for idx, word in enumerate(lyrics):
             for word_cmp in lyrics[idx+1:]:
                 word_str1 = top_words.unstemmed[word[0]]
                 word_str2 = top_words.unstemmed[word_cmp[0]]
-                total_count = word[1] + word_cmp[1]
-                value = total_count if nltk_helper.check_rhyme(word_str1, word_str2) else 0
-                rhyme_value += value
+                if nltk_helper.check_rhyme(word_str1, word_str2):
+                    rhyme_value += 1 
 
-        rhyme_value = rhyme_value / __get_word_count(lyrics)
+        rhyme_value /= __get_word_count(lyrics)
         rhyme_frequencies.append(rhyme_value)
         song_data.loc[song_name]['rhyme_value'] = rhyme_value
 
