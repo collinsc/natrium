@@ -50,7 +50,7 @@ def calculate_loading(V):
 def plot_loading_vectors(V2):
     size = math.ceil(math.sqrt(V2.shape[0]))
     fig, axes = plt.subplots(size, size, figsize=(14,8))
-    vectors = range(1,15)
+    vectors = range(1,23)
     for i, row in enumerate(axes):
         for j, ax in enumerate(row):
             idx = i*size+j
@@ -127,7 +127,7 @@ def main():
             ["Duration (s)", "Words (ct)", "Rhyme Index"],
             genre_list, 
             "genre",
-            "Duration v. Wordcound v. Rhyme Index")
+            "Duration v. Wordcount v. Rhyme Index")
 
     plot_features_3d(
             150, 
