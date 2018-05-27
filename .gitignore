@@ -112,4 +112,4 @@ msd_meta.db
 
 # output files
 visualizations/*
-
+data/*
