@@ -16,9 +16,13 @@ __wordtags = nltk.ConditionalFreqDist((w.lower(), t)
 # the word is used most as. Returns None if it failed
 def get_word_tag(word):
     try:
-        return __wordtags[word.lower()].max()
+        fd = __wordtags[word.lower()]
+        frequencies = {} 
+        for pos in fd:
+            frequencies[pos] = fd.freq(pos)
+        return frequencies 
     except ValueError:
-        return None
+        return {} 
 
 print('precomputing rhymes')
 

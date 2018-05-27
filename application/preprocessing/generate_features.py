@@ -63,10 +63,9 @@ def calculate_word_tags(frame, genre_data, song_data):
 
         speech_counter = Counter()
         for pair in lyrics:
-            part_of_speech = nltk_helper.get_word_tag(top_words.unstemmed[pair[0]])
-            if(part_of_speech):
-                speech_counter[part_of_speech.lower()] += pair[1]
-
+            speech_frequencies = nltk_helper.get_word_tag(top_words.unstemmed[pair[0]])
+            for pos, frequency in speech_frequencies.items():
+                speech_counter[pos.lower()] += frequency*pair[1] 
         counts = [speech_counter[x] for x in tag_list]
         frequencies = [x/__get_word_count(lyrics) for x in counts]
 
