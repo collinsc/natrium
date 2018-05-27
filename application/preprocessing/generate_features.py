@@ -172,7 +172,7 @@ def main():
         'adj', 'adp', 'adv', 'conj', 'det', 'noun', 'num', 'prt', 'pron', 
         'verb', 'x', "word_count", "rhyme_value", 'word_pop_punk',
         'word_pop_electronic', 'word_pop_rnb', 'word_pop_rap', 'word_pop_country',
-        'word_pop_pop', 'word_pop_rock']) 
+        'word_pop_metal', 'word_pop_pop', 'word_pop_rock']) 
 
 
     # sort by genre
