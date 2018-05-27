@@ -16,11 +16,14 @@ from mpl_toolkits.mplot3d import Axes3D
 
 def center_and_scale(frame):
     """Centers and scales a pandas dataframe"""
-    for key, col in frame.iteritems():
-        if pd.api.types.is_numeric_dtype(col):
+    def center_scale_col(col):
+        if (pd.api.types.is_numeric_dtype(col)):
             mean = col.mean()
             dev = col.std()
             col = (mean - col)/dev
+        return col
+    return frame.apply(center_scale_col)
+
 
 def calculate_scree(S):
     """Calculates information for scree plot"""
@@ -98,7 +101,8 @@ def main():
     genre_list = ["Punk", "Electronic","RnB", "Rap", "Country", "Metal", "Pop", "Rock"]
     data_frame = data_frame[data_frame["genre"].isin(genre_list)]
     print(data_frame.columns)
-    center_and_scale(data_frame)
+    data_frame = center_and_scale(data_frame)
+
     labels = data_frame["genre"]
 
     data_frame = data_frame.drop(columns=["genre", "release_year"])
@@ -130,7 +134,7 @@ def main():
             regular_scores, 
             labels,
             [1, 2, 3], 
-            ["", "", ""],
+            ["PC 1", "PC 2", "PC 3"],
             genre_list, 
             "genre",
             "Vector 1 v. Vector 2 v. Vector 3")
