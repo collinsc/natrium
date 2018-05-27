@@ -109,7 +109,7 @@ def calculate_popular_words(frame, genre_data, song_data, genre_top_words, valid
                 count_per_genre[genre] += count if(top_words.stemmed[word_idx] in genre_top_words[genre][0]) else 0
         for genre in valid_genres:
             count_per_genre[genre] /= __get_word_count(lyrics) # normalize
-            song_data.loc[song_name]['word_pop_' + genre] = count_per_genre[genre]
+            song_data.loc[song_name]['word_pop_' + genre.lower()] = count_per_genre[genre]
 
 
 # calculates rhymes based off what the pronouncing library says
@@ -170,9 +170,9 @@ def main():
     genre_data = {}
     song_data = pd.DataFrame(index=data_frame["track_id"],columns=["genre", "duration", "release_year",
         'adj', 'adp', 'adv', 'conj', 'det', 'noun', 'num', 'prt', 'pron', 
-        'verb', 'x', "word_count", "rhyme_value", 'word_pop_Punk',
-        'word_pop_Electronic', 'word_pop_RnB', 'word_pop_Rap', 'word_pop_Country',
-        'word_pop_Pop', 'word_pop_Rock']) 
+        'verb', 'x', "word_count", "rhyme_value", 'word_pop_punk',
+        'word_pop_electronic', 'word_pop_rnb', 'word_pop_rap', 'word_pop_country',
+        'word_pop_pop', 'word_pop_rock']) 
 
 
     # sort by genre
@@ -237,7 +237,7 @@ def main():
 
     # eliminate it to top N words and sort
     for genre in valid_genres:
-        N = 3
+        N = 5
         genre_top_words[genre].sort(key=lambda word: word[1], reverse=True)
         genre_top_words[genre] = genre_top_words[genre][0:N] # limit it
         genre_top_words[genre] = [x[0] for x in genre_top_words[genre]] # simplify it to just the word
