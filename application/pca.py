@@ -49,23 +49,24 @@ def calculate_loading(V):
 
 def plot_loading_vectors(V2):
     size = math.ceil(math.sqrt(V2.shape[0]))
-    fig, axes = plt.subplots(size, size, figsize=(14,8))
-    vectors = range(1,23)
+    fig, axes = plt.subplots(size, size, figsize=(19,15))
+    vectors = [label if label % 2 != 0 else "" for label in range(1,23)]
     for i, row in enumerate(axes):
         for j, ax in enumerate(row):
             idx = i*size+j
             if (idx < V2.shape[0]):
-                ax.bar(vectors, V2[idx],tick_label=vectors)
+                graph = ax.bar(range(1,23), V2[idx],tick_label=vectors)
                 y_lim = np.max(np.abs(V2[idx])) + 0.1
                 ax.set_ylim([-y_lim, y_lim])
                 ax.set(title="Vector %d" % (idx + 1), xlabel="Original Dimension", ylabel="Importance" )
-                plt.setp(ax.get_xticklabels(), rotation=45)
                 ax.axhline(lw = 0.5,color="black")
             else:
                 ax.axis("off")
     fig.suptitle("Loading Vector Plots", size = 18)
     fig.tight_layout()
     fig.subplots_adjust(top=0.9)
+    plt.savefig("loading_vectors.png")
+    
 
 def plot_features_3d(size, data, labels, cols, axes_labels, series_names, series_label, title):
     """makes a 3d plot of a set of data"""
@@ -109,9 +110,7 @@ def main():
 
     u, s, v = np.linalg.svd(data_frame, full_matrices = False)
     ur = np.dot(u, np.diag(s))
-    regular_scores = pd.DataFrame(data=ur, 
-            index = data_frame.index,
-            columns = range(1, ur.shape[1]+1))
+    regular_scores = pd.DataFrame(data=ur, index = data_frame.index, columns = range(1, ur.shape[1]+1))
 
     scores, cumulative_scores = calculate_scree(s)
     plot_scree(scores, cumulative_scores)
