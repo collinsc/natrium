@@ -146,6 +146,8 @@ def main():
     data_frame = pd.read_pickle(args.input_file.name)
     data_frame = data_frame[data_frame['genre'].isin(valid_genres)]
 
+    #data_frame = data_frame.sample(10000)
+
     song_data = pd.DataFrame(index=data_frame["track_id"],columns=["genre", "duration", "release_year",
         'adj', 'adp', 'adv', 'conj', 'det', 'noun', 'num', 'prt', 'pron', 
         'verb', 'x', "word_count", "rhyme_value", 'word_pop_punk',
@@ -200,22 +202,25 @@ def main():
         
         first_genre = ordered_keys[-1] # genre that uses the word the most
         second_genre = ordered_keys[-2] # the genre that uses it the second most
-        
+
         # skip words that are unlikely
-        if(word[first_genre] < .001):
+        if(word[first_genre] < .0005):
             continue
         
         # this disparity ratio will be used to find words that stand out for a genre
-        ratio = word[first_genre] / word[second_genre]
+        ratio = 2 # some default. set larger because if second is 0 then should be very large
+        if(word[second_genre] != 0):
+            ratio = word[first_genre] / word[second_genre]
         
         # give the useful stuff: which word it is and the ratio above the second highest.
         # Also the follow genre for funzies
         genre_top_words[first_genre].append((word_idx, ratio, second_genre))
+        genre_top_words[second_genre].append((word_idx, 1/ratio, second_genre))
     
 
     # eliminate it to top N words and sort
     for genre in valid_genres:
-        N = 5
+        N = 50
         genre_top_words[genre].sort(key=lambda word: word[1], reverse=True)
         genre_top_words[genre] = genre_top_words[genre][0:N] # limit it
         genre_top_words[genre] = [x[0] for x in genre_top_words[genre]] # simplify it to just the word
