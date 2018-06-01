@@ -25,11 +25,6 @@ def __get_word_count(lyrics):
         total += word[1]
     return total 
 
-# helper to create percentage histogram
-def __get_frequency_histogram(values):
-    hist = numpy.histogram(values, bins=numpy.linspace(0, 1, 11))
-    return { 'frequencies': hist[0].tolist(), 'bin_edges': hist[1].tolist() }
-
 # calculates the parts of speech the words in a song are (as percentage of total words)
 # for the song, it saves them like the following:
 # parts_of_speech = {
@@ -48,7 +43,7 @@ def __get_frequency_histogram(values):
 #         ...
 #         1.0
 #     }
-def calculate_word_tags(frame, genre_data, song_data):
+def calculate_word_tags(frame, song_data):
     # limit columns to the ones we care about
     frame = frame[['track_id', 'lyrics']]
 
@@ -74,22 +69,15 @@ def calculate_word_tags(frame, genre_data, song_data):
             genre_parts[tag].append(frequency)
         song_data.loc[song_name]['word_count'] = __get_word_count(lyrics) 
 
-    for tag in tag_list:
-        genre_data[tag.lower() + '_hist'] = __get_frequency_histogram(genre_parts[tag])
-
 
 # save durations of songs in the songs and a histogram in the genre
-def calculate_duration(frame, genre_data, song_data):
+def calculate_duration(frame, song_data):
     # limit columns to the ones we care about
     frame = frame[['track_id', 'duration', 'year']]
     durations = list(frame['duration'])
 
     hist = numpy.histogram(durations)
 
-    genre_data['duration_hist'] = {
-        'frequencies': hist[0].tolist(),
-        'bin_edges': hist[1].tolist()
-    }
 
     for index, song in frame.iterrows():
         song_name = song['track_id']
@@ -98,7 +86,7 @@ def calculate_duration(frame, genre_data, song_data):
 
 
 # calculates the top words for a genre and saves them to the genre
-def calculate_popular_words(frame, genre_data, song_data, genre_top_words, valid_genres):
+def calculate_popular_words(frame, song_data, genre_top_words, valid_genres):
     for index, song in frame.iterrows():
         song_name = song['track_id']
         lyrics = __get_lyrics(song)
@@ -118,7 +106,7 @@ def calculate_popular_words(frame, genre_data, song_data, genre_top_words, valid
 # here we match any possible way a spelling could rhyme
 # saves the number of rhymes as a percentage (relative to word count) for every song
 # and of course a distribution per genre
-def calculate_rhymes(frame, genre_data, song_data):
+def calculate_rhymes(frame, song_data):
     rhyme_frequencies = []
     for index, song in frame.iterrows():
         song_name = song['track_id']
@@ -136,10 +124,6 @@ def calculate_rhymes(frame, genre_data, song_data):
         song_data.loc[song_name]['rhyme_value'] = rhyme_value
 
     hist = numpy.histogram(rhyme_frequencies)
-    genre_data['rhyme__hist'] = {
-        'frequencies': hist[0].tolist(),
-        'bin_edges': hist[1].tolist()
-    }
 
 
 def main():
@@ -153,7 +137,6 @@ def main():
     args = parser.parse_args()
 
 
-    genre_data = {}
     song_data = {}
 
     valid_genres = ["Punk", "Electronic", "RnB", "Rap", "Country", "Metal", "Pop", "Rock"]
@@ -163,7 +146,6 @@ def main():
     data_frame = pd.read_pickle(args.input_file.name)
     data_frame = data_frame[data_frame['genre'].isin(valid_genres)]
 
-    genre_data = {}
     song_data = pd.DataFrame(index=data_frame["track_id"],columns=["genre", "duration", "release_year",
         'adj', 'adp', 'adv', 'conj', 'det', 'noun', 'num', 'prt', 'pron', 
         'verb', 'x', "word_count", "rhyme_value", 'word_pop_punk',
@@ -245,7 +227,6 @@ def main():
     for genre, frame in groups:
          print('processing genre called ' + genre)
          # initialize genre structs
-         genre_data[genre] = {}
 
          # intialize song structs
          for index, song in frame.iterrows():
@@ -253,16 +234,15 @@ def main():
              song_data.loc[song_name]["genre"] = genre
          
          # calculate all the interesting features
-         calculate_popular_words(frame, genre_data[genre], song_data, genre_top_words, valid_genres)
+         calculate_popular_words(frame, song_data, genre_top_words, valid_genres)
          print('25%')
-         calculate_word_tags(frame, genre_data[genre], song_data)
+         calculate_word_tags(frame, song_data)
          print('50%')
-         calculate_duration(frame, genre_data[genre], song_data)
+         calculate_duration(frame, song_data)
          print('75%')
-         calculate_rhymes(frame, genre_data[genre], song_data)
+         calculate_rhymes(frame, song_data)
          print('100%')
 
-    pd.DataFrame.from_dict(genre_data).to_pickle("../genre_data.pkl")
     song_data.infer_objects()
     song_data.to_pickle("../song_data.pkl")
          
