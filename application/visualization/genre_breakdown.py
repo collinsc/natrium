@@ -32,7 +32,7 @@ def generate_pie(data: list, filename: str):
     pie_values = [(x[0], x[1] / total_count) for x in data]
 
     plt.close()
-    plt.pie([x[1] for x in pie_values], startangle=90, labels=[x[0] for x in pie_values], rotatelabels=45)
+    plt.pie([x[1] for x in pie_values], startangle=90, labels=[x[0] for x in pie_values])
     # plt.legend(labels=[x[0] for x in pie_values], loc='best')
     plt.savefig(filename, dpi=480)
 
@@ -62,16 +62,16 @@ def main():
     sorted_dict.sort(key=lambda x: x[0])
 
     # Make the plot and save it
-    generate_hist(sorted_dict, 'visualizations/genre_hist_bygenre.png')
+    generate_hist(sorted_dict, '../visualizations/genre_hist_bygenre.png')
 
     # Re-sort by count for consistent plotting
     sorted_dict.sort(key=lambda x: x[1])
 
     # Make the plot and save it
-    generate_hist(sorted_dict, 'visualizations/genre_hist_bycount.png')
+    generate_hist(sorted_dict, '../visualizations/genre_hist_bycount.png')
 
     # Make a pie plot
-    generate_pie(sorted_dict, 'visualizations/genre_pie.png')
+    generate_pie(sorted_dict, '../visualizations/genre_pie.png')
 
 
 if __name__ == "__main__":
