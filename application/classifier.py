@@ -64,9 +64,13 @@ def classify(name, clf, train_data, train_labels, test_data, test_labels):
     return predictions, scores, test_labels.values.ravel()
 
 def evaluate(name, classes, predicted, scores, actual, pca_predicted, pca_scores, pca_actual, graph = True):
-    print("   Plotting:", name)
-    f, (ax1, ax2) = plt.subplots(1, 2, figsize=(15,7))
-    f.suptitle('%s ROC' % name)
+    if graph:
+        print("   Plotting:", name)
+        f, (ax1, ax2) = plt.subplots(1, 2, figsize=(15,7))
+        f.suptitle('%s ROC' % name)
+    else:
+        ax1 = None
+        ax2 = None
 
     def ROC(ax, title, classes, predicted, scores, actual, graph):
         fpr = dict()
@@ -77,20 +81,22 @@ def evaluate(name, classes, predicted, scores, actual, pca_predicted, pca_scores
         for i, cl in enumerate(classes):
             fpr[i], tpr[i], _ = roc_curve(actual, scores[:,i], pos_label=cl)
             roc_auc[i] = auc(fpr[i], tpr[i])
-            ax.plot(fpr[i], tpr[i],lw=lw, label='%s, (auc = %0.2f)' % (cl, roc_auc[i], ))
-        ax.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
-        ax.set_xlim([0.0, 1.0])
-        ax.set_ylim([0.0, 1.05])
-        ax.set_xlabel('False Positive Rate')
-        ax.set_ylabel('True Positive Rate')
-        ax.set_title('%s \n(acc = %0.2f, sum_auc = %0.2f)' % (title, acc, sum(roc_auc.values())))
-        ax.legend(loc="lower right")
+            if graph:
+                ax.plot(fpr[i], tpr[i],lw=lw, label='%s, (auc = %0.2f)' % (cl, roc_auc[i], ))
+        if graph:
+            ax.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+            ax.set_xlim([0.0, 1.0])
+            ax.set_ylim([0.0, 1.05])
+            ax.set_xlabel('False Positive Rate')
+            ax.set_ylabel('True Positive Rate')
+            ax.set_title('%s \n(acc = %0.2f, sum_auc = %0.2f)' % (title, acc, sum(roc_auc.values())))
+            ax.legend(loc="lower right")
         return sum(roc_auc.values())
 
     auc_sum = ROC(ax1, "Normal", classes, predicted, scores, actual, graph)
     pca_auc_sum = ROC(ax2, "PCA", classes, pca_predicted, pca_scores, pca_actual, graph)
  
-    if (graph):
+    if graph:
         plt.ion()
         plt.show()
         plt.pause(0.1)
@@ -126,10 +132,10 @@ def main():
             ]
 
     classifiers = [
-            KNeighborsClassifier(10),
+            KNeighborsClassifier(12),
             #SVC(kernel="linear", C=0.025),
             #SVC(gamma=2, C=1),
-            DecisionTreeClassifier(max_depth=5),
+            DecisionTreeClassifier(max_depth=8),
             MLPClassifier(),
             GaussianNB(),
             ]
@@ -137,58 +143,44 @@ def main():
     print("PARTITION_RATIO = ", partition_ratio)
     pc_count = 12 
     print("PC_COUNT = ", pc_count)
-    sizes = [
-            (10),
-            (10),
-            (50),
-            (100),
-            (200),
-            (50,25),
-            (75,25),
-            (50,50),
-            (75,50),
-            (100,25),
-            (100,50),
-            (100,75),
-            (100,100),
-            (200,100),
-            (100,50,25),
-            (100,50,50),
-            (200,100,50),
-            (10),
-            (10),
-            (10),
-            (10),
-            (10),
-            (10),
-            (10),
-            ]
+    optimization_plots = False 
+    print("OPTIMIZATION PLOTS", optimization_plots)
 
-    knn_auc_sum = [] 
-    knn_pca_auc_sum = [] 
-    tree_auc_sum =[] 
-    tree_pca_auc_sum =[] 
-    for i in range(1,15):
-        data = partition(data_frame, partition_ratio)
-        pca_data = pca_partition(data_frame, partition_ratio, pc_count)
-
-        results = classify(names[0],KNeighborsClassifier(i) , *data)
-        pca_results = classify(names[0],KNeighborsClassifier(i) , *pca_data)
-        auc, pca_auc = evaluate(names[0] + str(i), genre_list, *results, *pca_results, graph=False)
-        knn_auc_sum.append(auc)
-        knn_pca_auc_sum.append(pca_auc)
-
-        results = classify(names[1],DecisionTreeClassifier(max_depth=i) , *data)
-        pca_results = classify(names[1],DecisionTreeClassifier(max_depth=i) , *pca_data)
-        auc, pca_auc = evaluate(names[1] + str(i), genre_list, *results, *pca_results, graph = False)
-        tree_auc_sum.append(auc)
-        tree_pca_auc_sum.append(pca_auc)
-
-    plot(range(1,15), knn_auc_sum, range(1,15), knn_pca_auc_sum)
-    plot(range(1,15), tree_auc_sum, range(1,15), tree_pca_auc_sum)
-
-
-
+    if optimization_plots:
+        knn_auc_sum = [] 
+        knn_pca_auc_sum = [] 
+        tree_auc_sum =[] 
+        tree_pca_auc_sum =[] 
+        for i in range(1,15):
+            data = partition(data_frame, partition_ratio)
+            pca_data = pca_partition(data_frame, partition_ratio, pc_count)
+    
+            results = classify(names[0],KNeighborsClassifier(i) , *data)
+            pca_results = classify(names[0],KNeighborsClassifier(i) , *pca_data)
+            auc, pca_auc = evaluate(names[0] + str(i), genre_list, *results, *pca_results, graph=False)
+            knn_auc_sum.append(auc)
+            knn_pca_auc_sum.append(pca_auc)
+    
+            results = classify(names[1],DecisionTreeClassifier(max_depth=i) , *data)
+            pca_results = classify(names[1],DecisionTreeClassifier(max_depth=i) , *pca_data)
+            auc, pca_auc = evaluate(names[1] + str(i), genre_list, *results, *pca_results, graph = False)
+            tree_auc_sum.append(auc)
+            tree_pca_auc_sum.append(pca_auc)
+    
+        plt.figure()
+        plt.plot(range(1,15), knn_auc_sum, label="normal")
+        plt.plot(range(1,15), knn_pca_auc_sum, label="pca")
+        plt.title("KNN Optimization")
+        plt.xlabel("Neighbor Count")
+        plt.ylabel("Sum of AUC")
+        plt.figure()
+        plt.plot(range(1,15), tree_auc_sum, label="normal")
+        plt.plot(range(1,15), tree_pca_auc_sum, label="pca")
+        plt.title("Decision Tree Optimization")
+        plt.xlabel("Tree Depth")
+        plt.ylabel("Sum of AUC")
+        plt.ion()
+        plt.show()
 
     for name, clf in zip(names, classifiers):
         print("Starting:", name)
