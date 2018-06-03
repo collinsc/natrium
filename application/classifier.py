@@ -52,6 +52,18 @@ def pca_partition(data, ratio, pc_count):
     test_data, test_label = splitDataLabels(test)
     return pca.transform(train_data), train_label, pca.transform(test_data), test_label
 
+def center_and_scale(frame):
+    """Centers and scales a pandas dataframe"""
+    def center_scale_col(col):
+        if (pd.api.types.is_numeric_dtype(col)):
+            mean = col.mean()
+            dev = col.std()
+            col = (mean - col)/dev
+        return col
+    return frame.apply(center_scale_col)
+
+
+
  
 def classify(name, clf, train_data, train_labels, test_data, test_labels):
 
@@ -77,19 +89,23 @@ def evaluate(name, classes, predicted, scores, actual, pca_predicted, pca_scores
         tpr = dict()
         roc_auc = dict()
         lw = 2
-        acc =  np.sum(predicted ==  actual)/actual.shape[0]
+        matches = predicted[np.where(predicted == actual)]
         for i, cl in enumerate(classes):
-            fpr[i], tpr[i], _ = roc_curve(actual, scores[:,i], pos_label=cl)
-            roc_auc[i] = auc(fpr[i], tpr[i])
-            if graph:
-                ax.plot(fpr[i], tpr[i],lw=lw, label='%s, (auc = %0.2f)' % (cl, roc_auc[i], ))
+            if i <scores.shape[1]:
+                fpr[i], tpr[i], _ = roc_curve(actual, scores[:,i], pos_label=cl)
+                roc_auc[i] = auc(fpr[i], tpr[i])
+                if graph:
+                    ax.plot(fpr[i], tpr[i],lw=lw, label='%s, (auc = %0.2f)' % (cl, roc_auc[i] ))
         if graph:
             ax.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
             ax.set_xlim([0.0, 1.0])
             ax.set_ylim([0.0, 1.05])
             ax.set_xlabel('False Positive Rate')
             ax.set_ylabel('True Positive Rate')
-            ax.set_title('%s \n(acc = %0.2f, sum_auc = %0.2f)' % (title, acc, sum(roc_auc.values())))
+            acc =  np.sum(predicted == actual)/actual.shape[0]
+            sum_auc = sum(roc_auc.values())
+            mean_auc = sum_auc/len(roc_auc.values())
+            ax.set_title('%s \n(acc = %0.2f sum_auc = %0.2f, mean_auc = %0.2f)' % (title, acc, sum_auc, mean_auc))
             ax.legend(loc="lower right")
         return sum(roc_auc.values())
 
@@ -101,8 +117,6 @@ def evaluate(name, classes, predicted, scores, actual, pca_predicted, pca_scores
         plt.show()
         plt.pause(0.1)
     return auc_sum, pca_auc_sum
-
-
     
 def main():
     """The executable to read in the specified data file and perform the
@@ -121,9 +135,10 @@ def main():
     data_frame = data_frame[data_frame["genre"].isin(genre_list)]
     print(data_frame.columns)
     data_frame = data_frame.drop(columns=["release_year"])
+    data_frame = center_and_scale(data_frame)
 
     names = [
-            "Nearest Neighbors", 
+            #"Nearest Neighbors", 
             #"Linear SVM", 
             #"RBF SVM", 
             "Decision Tree", 
@@ -132,47 +147,35 @@ def main():
             ]
 
     classifiers = [
-            KNeighborsClassifier(12),
-            #SVC(kernel="linear", C=0.025),
-            #SVC(gamma=2, C=1),
-            DecisionTreeClassifier(max_depth=8),
-            MLPClassifier(),
-            GaussianNB(),
+            #(KNeighborsClassifier(12), False),
+            #(SVC(kernel="linear", probability=True), True),
+            #(SVC(probability=True), True),
+            (DecisionTreeClassifier(max_depth=9), False),
+            (MLPClassifier(), False),
+            (GaussianNB(), False),
             ]
     partition_ratio = 0.8 
     print("PARTITION_RATIO = ", partition_ratio)
+    reduced_partition_ratio = 0.0005
+    print("REDUCED_PARTITION_RATIO = ", reduced_partition_ratio)
     pc_count = 12 
     print("PC_COUNT = ", pc_count)
     optimization_plots = False 
     print("OPTIMIZATION PLOTS", optimization_plots)
 
     if optimization_plots:
-        knn_auc_sum = [] 
-        knn_pca_auc_sum = [] 
         tree_auc_sum =[] 
         tree_pca_auc_sum =[] 
         for i in range(1,15):
+            print("Optimizing:", i)
             data = partition(data_frame, partition_ratio)
             pca_data = pca_partition(data_frame, partition_ratio, pc_count)
-    
-            results = classify(names[0],KNeighborsClassifier(i) , *data)
-            pca_results = classify(names[0],KNeighborsClassifier(i) , *pca_data)
-            auc, pca_auc = evaluate(names[0] + str(i), genre_list, *results, *pca_results, graph=False)
-            knn_auc_sum.append(auc)
-            knn_pca_auc_sum.append(pca_auc)
-    
-            results = classify(names[1],DecisionTreeClassifier(max_depth=i) , *data)
-            pca_results = classify(names[1],DecisionTreeClassifier(max_depth=i) , *pca_data)
-            auc, pca_auc = evaluate(names[1] + str(i), genre_list, *results, *pca_results, graph = False)
+            results = classify(names[0],DecisionTreeClassifier(max_depth=i) , *data)
+            pca_results = classify(names[0],DecisionTreeClassifier(max_depth=i) , *pca_data)
+            auc, pca_auc = evaluate(names[0] + str(i), genre_list, *results, *pca_results, graph = False)
             tree_auc_sum.append(auc)
             tree_pca_auc_sum.append(pca_auc)
     
-        plt.figure()
-        plt.plot(range(1,15), knn_auc_sum, label="normal")
-        plt.plot(range(1,15), knn_pca_auc_sum, label="pca")
-        plt.title("KNN Optimization")
-        plt.xlabel("Neighbor Count")
-        plt.ylabel("Sum of AUC")
         plt.figure()
         plt.plot(range(1,15), tree_auc_sum, label="normal")
         plt.plot(range(1,15), tree_pca_auc_sum, label="pca")
@@ -182,13 +185,18 @@ def main():
         plt.ion()
         plt.show()
 
-    for name, clf in zip(names, classifiers):
+    for name, clf_reduce in zip(names, classifiers):
         print("Starting:", name)
         print("   Partitioning:", name)
-        data = partition(data_frame, partition_ratio)
-        pca_data = pca_partition(data_frame, partition_ratio, pc_count)
-        results = classify(name, clf, *data)
-        pca_results = classify(name, clf, *pca_data)
+        if clf_reduce[1]:
+            data = partition(data_frame, reduced_partition_ratio)
+            pca_data = pca_partition(data_frame, reduced_partition_ratio, pc_count)
+        else:
+            data = partition(data_frame, partition_ratio)
+            pca_data = pca_partition(data_frame, partition_ratio, pc_count)
+
+        results = classify(name, clf_reduce[0], *data)
+        pca_results = classify(name, clf_reduce[0], *pca_data)
         evaluate(name, genre_list, *results, *pca_results)
     input("Finished, press enter to close")
 
