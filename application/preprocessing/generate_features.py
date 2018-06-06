@@ -159,71 +159,24 @@ def main():
     print('sorting by genre')
     groups = data_frame.groupby('genre')
     
-    # first pass collect word counts per genre. Needed for getting unique and popular
-    # words between genres. (e.g. truck is rather unqiue and popular to country)
-    # stored as such:
-    # {
-    #   word1 : {genre1: .4, genre2: .5, ...},
-    #   word2 : {genre1: .7, genre2: .1, ...},
-    #   ...
-    #   wordn : {genre1: .4, genre2: .5, ...}
-    # }
-    # where the numbers after the genre keys are the average percentage of that
-    # word in that genre.
-    genre_dict_list = [defaultdict(int) for x in range(len(top_words.stemmed))]
-    word_genre_counts = dict(zip(top_words.stemmed, genre_dict_list))
+    word_counts_by_genre = defaultdict(lambda:defaultdict(int))
     for genre, frame in groups:
         print('calculating genre uses per word for ' + genre)
         # limit columns to the ones we care about
         frame = frame[['track_id', 'lyrics']]
 
-        song_count = 0
         for index, song in frame.iterrows():
             lyrics = __get_lyrics(song)
             for word_idx, count in lyrics:
-                word = top_words.stemmed[word_idx]
-                
-                # add the number of occurences of this word, normalized
-                # to the total number of words in the song (to the range [0, 1])
-                word_genre_counts[word][genre] += count/__get_word_count(lyrics)
-            
-            song_count += 1
+                word_counts_by_genre[genre][word_idx] += count
         
-        # get the average of normalized word counts 
-        for word in top_words.stemmed:
-            word_genre_counts[word][genre] /= song_count
-
-    genre_top_words = defaultdict(list)
-    for word_idx in word_genre_counts:
-        word = word_genre_counts[word_idx] # remember: of the form {Rock: .1, Country: .2, ...}
-        
-        # list of keys sorted by value
-        ordered_keys = sorted(word, key=word.__getitem__)
-        
-        first_genre = ordered_keys[-1] # genre that uses the word the most
-        second_genre = ordered_keys[-2] # the genre that uses it the second most
-
-        # skip words that are unlikely
-        if(word[first_genre] < .0005):
-            continue
-        
-        # this disparity ratio will be used to find words that stand out for a genre
-        ratio = 2 # some default. set larger because if second is 0 then should be very large
-        if(word[second_genre] != 0):
-            ratio = word[first_genre] / word[second_genre]
-        
-        # give the useful stuff: which word it is and the ratio above the second highest.
-        # Also the follow genre for funzies
-        genre_top_words[first_genre].append((word_idx, ratio, second_genre))
-        genre_top_words[second_genre].append((word_idx, 1/ratio, second_genre))
-    
-
+    genre_top_words = dict(zip(valid_genres, [list(word_counts_by_genre[x].items()) for x in valid_genres]))
     # eliminate it to top N words and sort
     for genre in valid_genres:
         N = 50
-        genre_top_words[genre].sort(key=lambda word: word[1], reverse=True)
+        genre_top_words[genre].sort(key=lambda x: x[1], reverse=True)
         genre_top_words[genre] = genre_top_words[genre][0:N] # limit it
-        genre_top_words[genre] = [x[0] for x in genre_top_words[genre]] # simplify it to just the word
+        genre_top_words[genre] = [top_words.stemmed[x[0]] for x in genre_top_words[genre]] # simplify it to just the word
 
     import json # temp
     print(json.dumps(genre_top_words, indent=4))
