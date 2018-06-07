@@ -65,7 +65,7 @@ def plot_loading_vectors(V2):
     fig.suptitle("Loading Vector Plots", size = 18)
     fig.tight_layout()
     fig.subplots_adjust(top=0.9)
-    plt.savefig("loading_vectors.png")
+    plt.savefig("../visualizations/loading_vectors.png")
     
 
 def plot_features_3d(size, data, labels, cols, axes_labels, series_names, series_label, title):
